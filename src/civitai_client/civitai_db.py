@@ -12,13 +12,20 @@ from sqlalchemy import (
     Integer,
     String,
 )
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
 from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.sql.schema import MetaData
 
-Base = declarative_base()
+class InitModel:
+    """Class with initialization of parameters"""
+    def __init__(self, **kwargs):
+        """Initialize model with kwargs"""
+        for key, value in kwargs.items():
+            setattr(self, key, value)
 
+Base = declarative_base(metadata=MetaData())
 
-class Image(Base):
+class Image(InitModel, Base):
     """SQLAlchemy model for images table"""
 
     __tablename__ = "images"
@@ -34,7 +41,7 @@ class Image(Base):
     username = Column(String(255))
 
 
-class ImageStatsHistory(Base):
+class ImageStatsHistory(InitModel, Base):
     """SQLAlchemy model for image stats history"""
 
     __tablename__ = "image_stats_history"
@@ -49,7 +56,7 @@ class ImageStatsHistory(Base):
     collected_at = Column(DateTime, default=datetime.now(timezone.utc))
 
 
-class GenerationParameters(Base):
+class GenerationParameters(InitModel, Base):
     """SQLAlchemy model for generation parameters"""
 
     __tablename__ = "generation_parameters"
@@ -83,15 +90,18 @@ class Database:
 
     def __init__(self, connection_url: str):
         """Initialize database connection"""
-        self.engine = create_async_engine(connection_url)
-        self.async_session = sessionmaker(
+        self.engine = create_async_engine(connection_url, echo=True)
+        self.async_session = async_sessionmaker(
             self.engine, class_=AsyncSession, expire_on_commit=False
         )
 
     async def init_db(self):
         """Create all tables"""
-        async with self.engine.begin() as conn:
-            await conn.run_sync(Base.metadata.create_all)
+        async with self.async_session as session:
+            async with self.engine.begin() as conn:
+                # await conn.run_sync(Base.metadata.drop_all)
+                await conn.run_sync(Base.metadata.create_all)
+            await session.commit()
 
     async def save_image_data(self, image_data: Dict[str, Any]):
         """Save image and related data to database"""
