@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "civitai-scraper"
+version = "0.1.0"
+description = ""
+authors = ["Ilia Tambovtsev <why6mail@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = ">=3.10,<3.13"
+aiohttp = "^3.11.12"
+sqlalchemy = {version = "^1.4.24", extras = ["asyncio"]}
+asyncpg = "^0.30.0"
+apache-airflow = "2.7.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
