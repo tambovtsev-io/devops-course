@@ -1,5 +1,6 @@
 import aiohttp
-from typing import Dict, Optional, List, Union
+from pydantic import BaseModel, Field, model_validator
+from typing import Any, Dict, Optional, List, Union
 from datetime import datetime
 from enum import Enum
 import logging
@@ -27,6 +28,129 @@ class TimePeriod(str, Enum):
     MONTH = "Month"
     WEEK = "Week"
     DAY = "Day"
+
+
+class ImageStats(BaseModel):
+    """Image statistics model"""
+    cry_count: int = Field(..., alias="cryCount")
+    laugh_count: int = Field(..., alias="laughCount")
+    like_count: int = Field(..., alias="likeCount")
+    heart_count: int = Field(..., alias="heartCount")
+    comment_count: int = Field(..., alias="commentCount")
+
+
+class SearchMetaData(BaseModel):
+    """Metadata for pagination"""
+    next_cursor: Optional[str] = Field(None, alias="nextCursor")
+    current_page: Optional[str] = Field(None, alias="currentPage")
+    page_size: Optional[str] = Field(None, alias="pageSize")
+    next_page: Optional[str] = Field(None, alias="nextPage")
+
+
+class GenerationParameters(BaseModel):
+    """Model for image generation parameters"""
+    # Core parameters
+    model: Optional[str] = Field(None, description="Name of the model used for generation")
+    prompt: Optional[str] = Field(None, description="Main generation prompt")
+    negative_prompt: Optional[str] = Field(
+        None,
+        alias="negativePrompt",
+        description="Negative prompt for generation"
+    )
+    sampler: Optional[str] = Field(None, description="Sampling method used")
+    cfg_scale: Optional[float] = Field(
+        None,
+        alias="cfgScale",
+        description="Classifier Free Guidance scale"
+    )
+    steps: Optional[int] = Field(None, description="Number of sampling steps")
+    seed: Optional[int] = Field(None, description="Generation seed")
+    size: Optional[str] = Field(None, alias="Size", description="Image dimensions")
+
+    # Common additional parameters
+    clip_skip: Optional[int] = Field(
+        None,
+        alias="Clip skip",
+        description="Number of CLIP layers to skip"
+    )
+    hires_upscale: Optional[str] = Field(
+        None,
+        alias="Hires upscale",
+        description="Hires fix upscale factor"
+    )
+    hires_upscaler: Optional[str] = Field(
+        None,
+        alias="Hires upscaler",
+        description="Upscaler used for hi-res fix"
+    )
+    denoising_strength: Optional[float] = Field(
+        None,
+        alias="Denoising strength",
+        description="Denoising strength for img2img or hires fix"
+    )
+
+    # Additional parameters that don't fit the standard fields
+    additional_params: Dict[str, Any] = Field(
+        default_factory=dict,
+        description="Any additional generation parameters"
+    )
+
+    @model_validator(mode="before")
+    def extract_parameters(cls, values: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+        """Extract known parameters and store the rest in additional_params"""
+        known_fields = {
+            field.alias if field.alias else name: name
+            for name, field in cls.model_fields.items()
+            if name != "additional_params"
+        }
+
+        result = {}
+        additional = {}
+
+        if values is None:
+            return dict()
+
+        for key, value in values.items():
+            if key in known_fields:
+                result[known_fields[key]] = value
+            else:
+                additional[key] = value
+
+        result["additional_params"] = additional
+        return result
+
+
+class ImageModel(BaseModel):
+    """Image data model"""
+    id: int
+    url: str
+    hash: str
+    width: int
+    height: int
+    nsfw: bool
+    nsfw_level: NSFWLevel = Field(..., alias="nsfwLevel")
+    created_at: datetime = Field(..., alias="createdAt")
+    post_id: int = Field(..., alias="postId")
+    stats: ImageStats
+    meta: GenerationParameters
+    username: str
+
+    class Config:
+        json_encoders = {
+            datetime: lambda v: v.isoformat()
+        }
+
+    def get_all_generation_params(self) -> Dict[str, Any]:
+        """Get all generation parameters including additional ones"""
+        params = self.meta.model_dump(exclude_none=True)
+        params.update(params.pop("additional_params", {}))
+        return params
+
+
+class ImageResponse(BaseModel):
+    """Response model for images endpoint"""
+    items: List[ImageModel]
+    metadata: SearchMetaData
 
 
 class CivitAIClient:
@@ -59,7 +183,7 @@ class CivitAIClient:
         sort: SortType = SortType.MOST_REACTIONS,
         period: TimePeriod = TimePeriod.DAY,
         page: Optional[int] = None
-    ) -> Dict:
+    ) -> ImageResponse:
         """Fetch data from /images endpoint from CivitAI API"""
         endpoint = f"{self.BASE_URL}/images"
 
@@ -90,4 +214,5 @@ class CivitAIClient:
             if response.status != 200:
                 logging.error(f"Error fetching images: {response.status}")
                 raise Exception(f"API request failed with status {response.status}")
-            return await response.json()
+            data = await response.json()
+            return ImageResponse(**data)
