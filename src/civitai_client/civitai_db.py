@@ -137,65 +137,83 @@ class Database:
         "Size",
     ]
 
-    def __init__(self, connection_url: str):
+    def __init__(self, settings: Optional[DatabaseSettings] = None):
         """Initialize database connection"""
-        self.engine = create_async_engine(connection_url, echo=True)
-        self.async_session = async_sessionmaker(
-            self.engine, class_=AsyncSession, expire_on_commit=False
+        self.settings = settings or get_db_settings()
+        self.engine = create_async_engine(
+            self.settings.asyncpg_url,
+            echo=True,
+            pool_size=5,
+            max_overflow=10
+        )
+        self.async_session = sessionmaker(
+            self.engine,
+            class_=AsyncSession,
+            expire_on_commit=False
         )
 
     async def init_db(self):
         """Create all tables"""
-        async with self.async_session as session:
-            async with self.engine.begin() as conn:
-                # await conn.run_sync(Base.metadata.drop_all)
-                await conn.run_sync(Base.metadata.create_all)
-            await session.commit()
+        async with self.engine.begin() as conn:
+            # await conn.run_sync(Base.metadata.drop_all)
+            await conn.run_sync(Base.metadata.create_all)
 
-    async def save_image_data(self, image_data: Dict[str, Any]):
+    async def save_image_data(self, image_data: ImageResponse):
         """Save image and related data to database"""
+        images = image_data.items
+        if not images:
+            return
+
         async with self.async_session() as session:
-            # Create image record
-            image = Image(
-                id=image_data["id"],
-                url=image_data["url"],
-                width=image_data["width"],
-                height=image_data["height"],
-                nsfw=image_data["nsfw"],
-                nsfw_level=image_data["nsfwLevel"],
-                created_at=datetime.fromisoformat(
-                    image_data["createdAt"].replace("Z", "+00:00")
-                ),
-                post_id=image_data["postId"],
-                username=image_data["username"],
-            )
+            async with session.begin():
+                for image in images:
+                    # Get or create image record
+                    db_image = await session.get(ImageDB, image.id)
+                    if db_image is None:
+                        db_image = ImageDB.from_pydantic(image)
+                        session.add(db_image)
+                    else:
+                        # Update existing image
+                        for key, value in ImageDB.from_pydantic(image).__dict__.items():
+                            if key != '_sa_instance_state':
+                                setattr(db_image, key, value)
 
-            # Create stats history record
-            stats = ImageStatsHistory(
-                image_id=image_data["id"],
-                cry_count=image_data["stats"]["cryCount"],
-                laugh_count=image_data["stats"]["laughCount"],
-                like_count=image_data["stats"]["likeCount"],
-                heart_count=image_data["stats"]["heartCount"],
-                comment_count=image_data["stats"]["commentCount"],
-            )
+                    # Always add new stats record
+                    stats = ImageStatsHistoryDB.from_pydantic(image)
+                    session.add(stats)
 
-            # Create generation parameters record
-            meta = image_data.get("meta", {})
-            gen_params = GenerationParameters(
-                image_id=image_data["id"],
-                model=meta.get("Model"),
-                prompt=meta.get("prompt"),
-                negative_prompt=meta.get("negativePrompt"),
-                sampler=meta.get("sampler"),
-                cfg_scale=meta.get("cfgScale"),
-                steps=meta.get("steps"),
-                seed=meta.get("seed"),
-                size=meta.get("Size"),
-                additional_params={
-                    k: v for k, v in meta.items() if k not in self.GUARANTEED_PARAMETERS
-                },
-            )
+                    # Update or create generation parameters
+                    stmt = select(GenerationParametersDB).where(
+                        GenerationParametersDB.image_id == image.id
+                    )
+                    result = await session.execute(stmt)
+                    db_params = result.scalar_one_or_none()
 
-            session.add_all([image, stats, gen_params])
-            await session.commit()
+                    if db_params is None:
+                        db_params = GenerationParametersDB.from_pydantic(
+                            image_id=image.id,
+                            params=image.meta
+                        )
+                        session.add(db_params)
+                    else:
+                        # Update existing parameters
+                        new_params = GenerationParametersDB.from_pydantic(
+                            image_id=image.id,
+                            params=image.meta
+                        )
+                        for key, value in new_params.__dict__.items():
+                            if key != '_sa_instance_state':
+                                setattr(db_params, key, value)
+
+
+async def init_database():
+    """Initialize database schema using SQLAlchemy models"""
+    db = Database()
+    async with db.engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+        await conn.run_sync(Base.metadata.create_all)
+
+
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(init_database())

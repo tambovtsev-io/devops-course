@@ -8,3 +8,5 @@ from src.civitai_client.civitai_client import (
     SortType,
     TimePeriod,
 )
+
+from src.civitai_client.civitai_db import Database
