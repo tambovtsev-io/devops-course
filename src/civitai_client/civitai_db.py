@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from sqlalchemy import (
     JSON,
@@ -12,9 +12,12 @@ from sqlalchemy import (
     Integer,
     String,
 )
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
+from sqlalchemy.sql import select
 from sqlalchemy.sql.schema import MetaData
+from src.civitai_client.config import DatabaseSettings, get_db_settings
+from src.civitai_client.civitai_client import ImageModel, GenerationParameters, ImageResponse
 
 class InitModel:
     """Class with initialization of parameters"""
@@ -25,7 +28,7 @@ class InitModel:
 
 Base = declarative_base(metadata=MetaData())
 
-class Image(InitModel, Base):
+class ImageDB(InitModel, Base):
     """SQLAlchemy model for images table"""
 
     __tablename__ = "images"
@@ -40,8 +43,24 @@ class Image(InitModel, Base):
     post_id = Column(BigInteger)
     username = Column(String(255))
 
+    @classmethod
+    def from_pydantic(cls, image: ImageModel) -> "ImageDB":
+        """Create SQLAlchemy model from Pydantic model"""
+        return cls(
+            id=image.id,
+            url=image.url,
+            width=image.width,
+            height=image.height,
+            nsfw=image.nsfw,
+            nsfw_level=image.nsfw_level,
+            created_at=image.created_at,
+            post_id=image.post_id,
+            username=image.username
+        )
 
-class ImageStatsHistory(InitModel, Base):
+
+
+class ImageStatsHistoryDB(InitModel, Base):
     """SQLAlchemy model for image stats history"""
 
     __tablename__ = "image_stats_history"
@@ -55,8 +74,20 @@ class ImageStatsHistory(InitModel, Base):
     comment_count = Column(Integer)
     collected_at = Column(DateTime, default=datetime.now(timezone.utc))
 
+    @classmethod
+    def from_pydantic(cls, image: ImageModel) -> "ImageStatsHistoryDB":
+        """Create SQLAlchemy model from Pydantic model"""
+        return cls(
+            image_id=image.id,
+            cry_count=image.stats.cry_count,
+            laugh_count=image.stats.laugh_count,
+            like_count=image.stats.like_count,
+            heart_count=image.stats.heart_count,
+            comment_count=image.stats.comment_count
+        )
 
-class GenerationParameters(InitModel, Base):
+
+class GenerationParametersDB(InitModel, Base):
     """SQLAlchemy model for generation parameters"""
 
     __tablename__ = "generation_parameters"
@@ -72,6 +103,24 @@ class GenerationParameters(InitModel, Base):
     seed = Column(BigInteger)
     size = Column(String(20))
     additional_params = Column(JSON)
+
+    @classmethod
+    def from_pydantic(
+        cls, image_id: int, params: GenerationParameters
+    ) -> "GenerationParametersDB":
+        """Create SQLAlchemy model from Pydantic model"""
+        return cls(
+            image_id=image_id,
+            model=params.model,
+            prompt=params.prompt,
+            negative_prompt=params.negative_prompt,
+            sampler=params.sampler,
+            cfg_scale=params.cfg_scale,
+            steps=params.steps,
+            seed=params.seed,
+            size=params.size,
+            additional_params=params.additional_params
+        )
 
 
 class Database:
