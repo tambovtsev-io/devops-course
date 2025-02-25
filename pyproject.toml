@@ -8,9 +8,13 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = ">=3.10,<3.13"
 aiohttp = "^3.11.12"
-sqlalchemy = {version = "^1.4.24", extras = ["asyncio"]}
+sqlalchemy = {version = "^1.4.36", extras = ["asyncio"]}
 asyncpg = "^0.30.0"
-apache-airflow = "2.7.1"
+apache-airflow = "2.10.5"
+ipykernel = "^6.29.5"
+python-dotenv = "^1.0.1"
+pydantic-settings = "^2.8.0"
+psycopg2-binary = "^2.9.10"
 
 
 [build-system]
