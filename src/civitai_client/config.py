@@ -19,7 +19,7 @@ class DatabaseSettings(BaseSettings):
     def sync_url(self) -> str:
         """Get async PostgreSQL URL for asyncpg"""
         url = PostgresDsn.build(
-            scheme="postgresql+asyncpg",
+            scheme="postgresql",
             username=self.POSTGRES_USER,
             password=self.POSTGRES_PASSWORD,
             host=self.POSTGRES_HOST,
