@@ -1,16 +1,7 @@
-# scripts/test_pipeline.py
 import asyncio
 import logging
-from datetime import datetime, timezone
-from typing import Optional
 
-from src.civitai_client import (
-    CivitAIClient,
-    Database,
-    ImageResponse,
-    SortType,
-    TimePeriod,
-)
+from src.civitai_client import CivitAIClient, Database, SortType, TimePeriod
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"

@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from typing import Any, Dict, Optional
+from typing import Optional
 
 from sqlalchemy import (
     JSON,
@@ -13,7 +13,6 @@ from sqlalchemy import (
     String,
     create_engine,
 )
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
 from sqlalchemy.sql import select
 from sqlalchemy.sql.schema import MetaData
