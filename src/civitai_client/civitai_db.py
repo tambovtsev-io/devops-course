@@ -162,7 +162,7 @@ class Database:
 
     def init_db(self):
         """Create all tables"""
-        Base.metadata.create_all(self.engine)
+        Base.metadata.create_all(self.engine)  # pyright: ignore[reportAttributeAccessIssue] # fmt: skip
 
     def save_image_data(self, image_data: ImageResponse):
         """Save image and related data to database"""
@@ -171,7 +171,7 @@ class Database:
             return
 
         with self.session() as session:
-            with session.begin():
+            with session.begin():  # pyright: ignore[reportGeneralTypeIssues]
                 for image in images:
                     # Get or create image record
                     db_image = session.get(ImageDB, image.id)
