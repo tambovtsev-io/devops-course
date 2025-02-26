@@ -30,7 +30,6 @@ class InitModel:
     """Class with initialization of parameters"""
 
     def __init__(self, **kwargs):
-        """Initialize model with kwargs"""
         for key, value in kwargs.items():
             setattr(self, key, value)
 
@@ -39,7 +38,10 @@ Base = declarative_base(metadata=MetaData())
 
 
 class ImageDB(InitModel, Base):
-    """SQLAlchemy model for images table"""
+    """
+    SQLAlchemy model for images table.
+    This table stores unique images.
+    """
 
     __tablename__ = "images"
 
@@ -55,7 +57,6 @@ class ImageDB(InitModel, Base):
 
     @classmethod
     def from_pydantic(cls, image: ImageModel) -> "ImageDB":
-        """Create SQLAlchemy model from Pydantic model"""
         return cls(
             id=image.id,
             url=image.url,
@@ -70,7 +71,10 @@ class ImageDB(InitModel, Base):
 
 
 class ImageStatsHistoryDB(InitModel, Base):
-    """SQLAlchemy model for image stats history"""
+    """
+    SQLAlchemy model for image stats history.
+    This table aims to track the activity for images.
+    """
 
     __tablename__ = "image_stats_history"
 
@@ -85,7 +89,6 @@ class ImageStatsHistoryDB(InitModel, Base):
 
     @classmethod
     def from_pydantic(cls, image: ImageModel) -> "ImageStatsHistoryDB":
-        """Create SQLAlchemy model from Pydantic model"""
         return cls(
             image_id=image.id,
             cry_count=image.stats.cry_count,
@@ -97,7 +100,10 @@ class ImageStatsHistoryDB(InitModel, Base):
 
 
 class GenerationParametersDB(InitModel, Base):
-    """SQLAlchemy model for generation parameters"""
+    """
+    SQLAlchemy model for generation parameters.
+    This table stores generation parameters for images.
+    """
 
     __tablename__ = "generation_parameters"
 
@@ -117,7 +123,6 @@ class GenerationParametersDB(InitModel, Base):
     def from_pydantic(
         cls, image_id: int, params: GenerationParameters
     ) -> "GenerationParametersDB":
-        """Create SQLAlchemy model from Pydantic model"""
         return cls(
             image_id=image_id,
             model=params.model,
@@ -134,17 +139,6 @@ class GenerationParametersDB(InitModel, Base):
 
 class Database:
     """Async database management class"""
-
-    GUARANTEED_PARAMETERS = [
-        "Model",
-        "prompt",
-        "negativePrompt",
-        "sampler",
-        "cfgScale",
-        "steps",
-        "seed",
-        "Size",
-    ]
 
     def __init__(self, settings: Optional[DatabaseSettings] = None):
         """Initialize database connection"""
