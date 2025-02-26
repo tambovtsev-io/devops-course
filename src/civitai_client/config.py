@@ -6,35 +6,23 @@ from pydantic_settings import BaseSettings
 
 
 class DatabaseSettings(BaseSettings):
-    """Database connection settings with Pydantic validation"""
+    """
+    Database connection settings with Pydantic validation.
+    Uses variables specified in .env
+    """
 
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
+    POSTGRES_USER: str = ""
+    POSTGRES_PASSWORD: str = ""
     POSTGRES_HOST: str = "localhost"
     POSTGRES_PORT: int = 5050
     POSTGRES_DB: str = "civitai_analytics"
     POSTGRES_SCHEMA: Optional[str] = None
 
-    @property
-    def sync_url(self) -> str:
+    def get_url(self, use_async: bool = False) -> str:
         """Get async PostgreSQL URL for asyncpg"""
+        scheme = "postgresql" if not use_async else "postgresql+asyncpg"
         url = PostgresDsn.build(
-            scheme="postgresql",
-            username=self.POSTGRES_USER,
-            password=self.POSTGRES_PASSWORD,
-            host=self.POSTGRES_HOST,
-            port=self.POSTGRES_PORT,
-            path=f"{self.POSTGRES_DB}",
-        )
-        if self.POSTGRES_SCHEMA:
-            return f"{url}?options=-csearch_path%3D{self.POSTGRES_SCHEMA}"
-        return str(url)
-
-    @property
-    def asyncpg_url(self) -> str:
-        """Get async PostgreSQL URL for asyncpg"""
-        url = PostgresDsn.build(
-            scheme="postgresql+asyncpg",
+            scheme=scheme,
             username=self.POSTGRES_USER,
             password=self.POSTGRES_PASSWORD,
             host=self.POSTGRES_HOST,

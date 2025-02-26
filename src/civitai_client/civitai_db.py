@@ -150,7 +150,7 @@ class Database:
         """Initialize database connection"""
         self.settings = settings or get_db_settings()
 
-        postgres_url = self.settings.sync_url
+        postgres_url = self.settings.get_url(use_async=False)
         self.engine = create_engine(
             postgres_url, echo=True, pool_size=5, max_overflow=10
         )
