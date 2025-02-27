@@ -6,9 +6,8 @@ x-airflow-common: &airflow-common
   build: .
   environment: &airflow-common-env
     AIRFLOW__CORE__EXECUTOR: LocalExecutor
-    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
-    AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
-    AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
+    AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow
+    AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@airflow-db:5432/airflow
     AIRFLOW__CORE__FERNET_KEY: ""
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: "true"
     AIRFLOW__CORE__LOAD_EXAMPLES: "false"
@@ -31,8 +30,8 @@ x-airflow-common: &airflow-common
     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     POSTGRES_HOST: civitai-db
     POSTGRES_PORT: 5432
-    POSTGRES_DB: ${POSTGRES_DB}
-    POSTGRES_SCHEMA: ${POSTGRES_SCHEMA}
+    POSTGRES_DB: civitai_analytics
+    POSTGRES_SCHEMA: "public"
     CIVITAI_API_KEY: ${CIVITAI_API_KEY}
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/src:/opt/airflow/src
@@ -62,7 +61,7 @@ services:
       start_period: 5s
     restart: always
     ports:
-      - "5432:5432"
+      - "5051:5432"
 
   # CivitAI database
   civitai-db:
