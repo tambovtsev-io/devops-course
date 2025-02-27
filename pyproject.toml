@@ -1,25 +1,19 @@
-[tool.poetry]
-name = "civitai-scraper"
+[project]
+name = "devops-course-repo"
 version = "0.1.0"
 description = ""
-authors = ["Ilia Tambovtsev <why6mail@gmail.com>"]
 readme = "README.md"
-
-[tool.poetry.dependencies]
-python = ">=3.10,<3.13"
-aiohttp = "^3.11.12"
-sqlalchemy = {version = "^1.4.36", extras = ["asyncio"]}
-asyncpg = "^0.30.0"
-apache-airflow = "2.10.5"
-ipykernel = "^6.29.5"
-python-dotenv = "^1.0.1"
-pydantic-settings = "^2.8.0"
-psycopg2-binary = "^2.9.10"
-
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires-python = ">=3.12"
+dependencies = [
+    "aiohttp>=3.11.13",
+    "apache-airflow==2.10.5",
+    "asyncpg>=0.30.0",
+    "ipykernel>=6.29.5",
+    "psycopg2-binary>=2.9.10",
+    "pydantic-settings>=2.8.0",
+    "python-dotenv>=1.0.1",
+    "sqlalchemy[asyncio]<2.0",
+]
 
 [tool.pyright]
 venvPath = "."
