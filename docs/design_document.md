@@ -1,4 +1,4 @@
-# CivitAI Image Analytics Project
+# CivitAI Image Analytics Project (by Claude3.5)
 
 ## Project Overview
 This project aims to analyze factors affecting image ratings on CivitAI by collecting and analyzing image data, generation parameters, and user interactions over time. The system will track reactions, comments, and metadata to identify patterns and correlations between generation parameters and image popularity.
@@ -87,6 +87,8 @@ with DAG(
 ```
 
 ### 2. API Client
+The api specification is available at [Public REST API | Civitai | Developer Portal](https://developer.civitai.com/docs/api/public-rest#get-apiv1images)
+
 ```python
 class CivitAIClient:
     BASE_URL = "https://civitai.com/api/v1"
@@ -176,5 +178,3 @@ volumes:
    - Retry mechanism for failed requests
    - Error logging and alerting
    - Data validation and cleanup
-
-This technical documentation provides a foundation for implementing the CivitAI analytics system. The modular architecture allows for easy expansion and maintenance as the project evolves.
