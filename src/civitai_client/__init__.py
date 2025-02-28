@@ -1,7 +1,7 @@
 from src.civitai_client.civitai_client import (
     CivitAIClient,
     GenerationParameters,
-    ImageModel,
+    ImageData,
     ImageResponse,
     ImageStats,
     SearchMetaData,

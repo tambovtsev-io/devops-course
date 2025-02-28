@@ -57,27 +57,24 @@ class GenerationParameters(BaseModel):
     """Model for image generation parameters"""
 
     # Core parameters
-    model: Optional[str] = Field(
-        None, description="Name of the model used for generation"
+    model: Optional[str] = Field(None, alias="Model")
+    prompt: Optional[str] = Field(None)
+    negative_prompt: Optional[str] = Field(None, alias="negativePrompt")
+    sampler: Optional[str] = Field(None)
+    schedule_type: Optional[str] = Field(
+        None, alias="Schedule type", description="Scheduler used"
     )
-    prompt: Optional[str] = Field(None, description="Main generation prompt")
-    negative_prompt: Optional[str] = Field(
-        None, alias="negativePrompt", description="Negative prompt for generation"
-    )
-    sampler: Optional[str] = Field(None, description="Sampling method used")
-    cfg_scale: Optional[float] = Field(
-        None, alias="cfgScale", description="Classifier Free Guidance scale"
-    )
-    steps: Optional[int] = Field(None, description="Number of sampling steps")
-    seed: Optional[int] = Field(None, description="Generation seed")
-    size: Optional[str] = Field(None, alias="Size", description="Image dimensions")
+    cfg_scale: Optional[float] = Field(None, alias="cfgScale")
+    steps: Optional[int] = Field(None)
+    seed: Optional[int] = Field(None)
+    size: Optional[str] = Field(None, alias="Size")
 
     # Common additional parameters
     clip_skip: Optional[int] = Field(
-        None, alias="Clip skip", description="Number of CLIP layers to skip"
+        None, alias="clipSkip", description="Number of CLIP layers to skip"
     )
     hires_upscale: Optional[str] = Field(
-        None, alias="Hires upscale", description="Hires fix upscale factor"
+        None, alias="Hires upscale", description="Hires upscale factor"
     )
     hires_upscaler: Optional[str] = Field(
         None, alias="Hires upscaler", description="Upscaler used for hi-res fix"
@@ -85,7 +82,6 @@ class GenerationParameters(BaseModel):
     denoising_strength: Optional[float] = Field(
         None,
         alias="Denoising strength",
-        description="Denoising strength for img2img or hires fix",
     )
 
     # Additional parameters that don't fit the standard fields
@@ -118,7 +114,7 @@ class GenerationParameters(BaseModel):
         return result
 
 
-class ImageModel(BaseModel):
+class ImageData(BaseModel):
     """Image data model"""
 
     id: int
@@ -132,6 +128,7 @@ class ImageModel(BaseModel):
     post_id: int = Field(..., alias="postId")
     stats: ImageStats
     meta: GenerationParameters
+    base_model: Optional[str] = Field(None, alias="baseModel")
     username: str
 
     class Config:
@@ -147,7 +144,7 @@ class ImageModel(BaseModel):
 class ImageResponse(BaseModel):
     """Response model for images endpoint"""
 
-    items: List[ImageModel]
+    items: List[ImageData]
     metadata: SearchMetaData
 
 

@@ -30,7 +30,8 @@ class InitModel:
 
     def __init__(self, **kwargs):
         for key, value in kwargs.items():
-            setattr(self, key, value)
+            if hasattr(self, key):
+                setattr(self, key, value)
 
 
 Base = declarative_base(metadata=MetaData())
@@ -46,6 +47,7 @@ class ImageDB(InitModel, Base):
 
     id = Column(BigInteger, primary_key=True)
     url = Column(String)
+    base_model = Column(String)
     width = Column(Integer)
     height = Column(Integer)
     nsfw = Column(Boolean)
@@ -55,10 +57,11 @@ class ImageDB(InitModel, Base):
     username = Column(String(255))
 
     @classmethod
-    def from_pydantic(cls, image: ImageModel) -> "ImageDB":
+    def from_pydantic(cls, image: ImageData) -> "ImageDB":
         return cls(
             id=image.id,
             url=image.url,
+            base_model=image.base_model,
             width=image.width,
             height=image.height,
             nsfw=image.nsfw,
@@ -87,7 +90,7 @@ class ImageStatsHistoryDB(InitModel, Base):
     collected_at = Column(DateTime, default=datetime.now(timezone.utc))
 
     @classmethod
-    def from_pydantic(cls, image: ImageModel) -> "ImageStatsHistoryDB":
+    def from_pydantic(cls, image: ImageData) -> "ImageStatsHistoryDB":
         return cls(
             image_id=image.id,
             cry_count=image.stats.cry_count,
@@ -112,10 +115,12 @@ class GenerationParametersDB(InitModel, Base):
     prompt = Column(String)
     negative_prompt = Column(String)
     sampler = Column(String(50))
+    schedule_type = Column(String(30))
     cfg_scale = Column(Float)
     steps = Column(Integer)
     seed = Column(BigInteger)
     size = Column(String(20))
+    clip_skip = Column(Integer)
     additional_params = Column(JSON)
 
     @classmethod
@@ -128,10 +133,12 @@ class GenerationParametersDB(InitModel, Base):
             prompt=params.prompt,
             negative_prompt=params.negative_prompt,
             sampler=params.sampler,
+            schedule_type=params.schedule_type,
             cfg_scale=params.cfg_scale,
             steps=params.steps,
             seed=params.seed,
             size=params.size,
+            clip_skip=params.clip_skip,
             additional_params=params.additional_params,
         )
 
