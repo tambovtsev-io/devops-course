@@ -12,11 +12,31 @@ CivitAI - одна из самых крупных галерей генерат�
 *Проект в рамках курса Devops.*
 
 ## Запуск проекта
-Для запуска приложения
+Для запуска приложения нужно задать переменные в .env и запустить проект через `docker compose`.
 
+```.env
+# Airflow Configs
+AIRFLOW_UID=50000
+AIRFLOW_GID=0
+_AIRFLOW_WWW_USER_USERNAME=admin
+_AIRFLOW_WWW_USER_PASSWORD=1234
 
-1. Запуск через докер: `docker compose up`
-2. Войдите в AirFlow: `localhost:8080`
+# Postgres Common Configs
+POSTGRES_HOST=localhost
+POSTGRES_SCHEMA=public
+
+# CivitAI Configs
+POSTGRES_USER=civitai_user
+POSTGRES_PASSWORD=1234
+POSTGRES_PORT=5050
+POSTGRES_DB=civitai_analytics
+CIVITAI_API_KEY=49e7cedcdf8f8efd839e7c192367c0c4
+```
+
+1. Запустите контейнеры: `docker compose up`
+2. Войдите в AirFlow: `localhost:8080`. Логин: `admin`, Пароль: `1234`
+3. Запустите DAG `civitai_etl`
+4. Протестировать функционал можно в ноутбуке: [ноутбук с тестами](./notebooks/analyse_images.ipynb)
 
 ## Схема БД для хранения изображений
 Спецификация API для изображений [по ссылке](https://developer.civitai.com/docs/api/public-rest#get-apiv1images).
