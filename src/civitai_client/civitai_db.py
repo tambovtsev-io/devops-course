@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Dict, Optional
 
+import pandas as pd
 from sqlalchemy import (
     JSON,
     BigInteger,
@@ -19,7 +20,7 @@ from sqlalchemy.sql.schema import MetaData
 
 from src.civitai_client.civitai_client import (
     GenerationParameters,
-    ImageModel,
+    ImageData,
     ImageResponse,
 )
 from src.civitai_client.config import DatabaseSettings, get_db_settings
@@ -209,6 +210,114 @@ class Database:
                             if key != "_sa_instance_state":
                                 setattr(db_params, key, value)
                 session.commit()
+
+    def get_table(self, table_class) -> Dict[str, list]:
+        """
+        Get all records from a table as a dictionary of columns
+
+        Args:
+            table_class: SQLAlchemy model class (ImageDB, ImageStatsHistoryDB, or GenerationParametersDB)
+
+        Returns:
+            Dict[str, list]: Dictionary where keys are column names and values are lists of column values
+        """
+        with self.session() as session:
+            query = select(table_class)
+            result = session.execute(query)
+            rows = [row[0].__dict__ for row in result.all()]
+
+            if not rows:
+                return dict()
+
+            # Convert rows to columns
+            columns = {}
+            for key in rows[0].keys():
+                if key != "_sa_instance_state":
+                    columns[key] = [row[key] for row in rows]
+
+            return columns
+
+    def get_table_df(self, table_class) -> pd.DataFrame:
+        """
+        Get data from a single table as pandas DataFrame
+
+        Args:
+            table_class: SQLAlchemy model class (ImageDB, ImageStatsHistoryDB, or GenerationParametersDB)
+
+        Returns:
+            pandas.DataFrame: Data from the specified table
+        """
+        columns = self.get_table(table_class)
+        if columns:
+            return pd.DataFrame(columns)
+        return pd.DataFrame()
+
+    def get_images_with_params(self) -> pd.DataFrame:
+        """
+        Get images data joined with their generation parameters
+
+        Returns:
+            pandas.DataFrame: Joined data from images and generation_parameters tables
+        """
+        df_images = self.get_table_df(ImageDB)
+        df_params = self.get_table_df(GenerationParametersDB)
+
+        # Merge dataframes on image_id
+        df_merged = pd.merge(
+            df_images, df_params, left_on="id", right_on="image_id", how="left"
+        )
+
+        # Clean up merged dataframe
+        if not df_merged.empty:
+            df_merged = df_merged.drop(["image_id", "id_y"], axis=1)
+            df_merged = df_merged.rename(columns={"id_x": "id"})
+
+        return df_merged
+
+    def get_images_with_stats(
+        self, start_date: Optional[datetime] = None, end_date: Optional[datetime] = None
+    ) -> pd.DataFrame:
+        """
+        Get images data joined with their latest stats
+
+        Args:
+            start_date: Optional start date for filtering stats
+            end_date: Optional end date for filtering stats
+
+        Returns:
+            pandas.DataFrame: Joined data from images and image_stats_history tables
+        """
+        df_images = self.get_table_df(ImageDB)
+        df_stats = self.get_table_df(ImageStatsHistoryDB)
+
+        # Apply date filters if provided
+        if start_date:
+            df_stats = df_stats[df_stats["collected_at"] >= start_date]
+        if end_date:
+            df_stats = df_stats[df_stats["collected_at"] <= end_date]
+
+        # Get the latest stats for each image
+        if isinstance(df_stats, pd.DataFrame) and not df_stats.empty:
+            latest_stats = (
+                df_stats.sort_values("collected_at")
+                .groupby("image_id")
+                .last()
+                .reset_index()
+            )
+
+            # Merge with images data
+            df_merged = pd.merge(
+                df_images, latest_stats, left_on="id", right_on="image_id", how="left"
+            )
+
+            # Clean up merged dataframe
+            if not df_merged.empty:
+                df_merged = df_merged.drop(["image_id", "id_y"], axis=1)
+                df_merged = df_merged.rename(columns={"id_x": "id"})
+        else:
+            df_merged = df_images
+
+        return df_merged
 
 
 def init_database():
