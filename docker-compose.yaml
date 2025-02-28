@@ -26,8 +26,8 @@ x-airflow-common: &airflow-common
     # AIRFLOW_CONFIG: '/opt/airflow/config/airflow.cfg'
 
     # CivitAI environment variables - point to civitai-db service
-    POSTGRES_USER: ${POSTGRES_USER}
-    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    POSTGRES_USER: ${POSTGRES_USER:-civitai_client}
+    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-1234}
     POSTGRES_HOST: civitai-db
     POSTGRES_PORT: 5432
     POSTGRES_DB: civitai_analytics

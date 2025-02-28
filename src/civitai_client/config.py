@@ -11,8 +11,8 @@ class DatabaseSettings(BaseSettings):
     Uses variables specified in .env
     """
 
-    POSTGRES_USER: str = ""
-    POSTGRES_PASSWORD: str = ""
+    POSTGRES_USER: str = "civitai_client"
+    POSTGRES_PASSWORD: str = "1234"
     POSTGRES_HOST: str = "localhost"
     POSTGRES_PORT: int = 5050
     POSTGRES_DB: str = "civitai_analytics"
