@@ -12,7 +12,7 @@ COPY pyproject.toml .
 
 # Install uv and resolve dependencies
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
-RUN uv sync
+RUN uv sync --no-dev
 ENV PATH="$AIRFLOW_HOME/.venv/bin:$PATH"
 
 USER airflow

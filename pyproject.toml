@@ -8,11 +8,19 @@ dependencies = [
     "aiohttp>=3.11.13",
     "apache-airflow==2.10.5",
     "asyncpg>=0.30.0",
-    "ipykernel>=6.29.5",
+    "pandas>=2.2.3",
     "psycopg2-binary>=2.9.10",
     "pydantic-settings>=2.8.0",
     "python-dotenv>=1.0.1",
     "sqlalchemy[asyncio]<2.0",
+]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=6.29.5",
+    "matplotlib>=3.10.1",
+    "pillow>=11.1.0",
+    "seaborn>=0.13.2",
 ]
 
 [tool.pyright]
