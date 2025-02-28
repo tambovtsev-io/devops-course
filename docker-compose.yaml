@@ -15,10 +15,10 @@ x-airflow-common: &airflow-common
     # CivitAI environment variables - point to civitai-db service
     POSTGRES_USER: ${POSTGRES_USER:-civitai_client}
     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-1234}
-    POSTGRES_HOST: civitai-db
+    POSTGRES_HOST: $POSTGRES_HOST
     POSTGRES_PORT: 5432
-    POSTGRES_DB: civitai_analytics
-    POSTGRES_SCHEMA: "public"
+    POSTGRES_DB: $POSTGRES_DB
+    POSTGRES_SCHEMA: $POSTGRES_SCHEMA
     CIVITAI_API_KEY: ${CIVITAI_API_KEY}
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/src:/opt/airflow/src
