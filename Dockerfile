@@ -6,8 +6,8 @@ USER root
 WORKDIR $AIRFLOW_HOME
 
 # Copy source code
-COPY ./src /opt/airflow/src
-COPY ./dags /opt/airflow/dags
+COPY ./src .
+COPY ./dags .
 COPY pyproject.toml .
 
 # Install uv and resolve dependencies

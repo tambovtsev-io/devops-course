@@ -23,7 +23,7 @@ _AIRFLOW_WWW_USER_USERNAME=admin
 _AIRFLOW_WWW_USER_PASSWORD=1234
 
 # Postgres Common Configs
-POSTGRES_HOST=localhost
+POSTGRES_HOST=civitai-db
 POSTGRES_SCHEMA=public
 
 # CivitAI Configs
