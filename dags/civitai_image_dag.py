@@ -60,8 +60,8 @@ def load_data_task(**context):
 with DAG(
     "civitai_etl",
     description="Fetch and load CivitAI data",
-    schedule_interval=timedelta(hours=12),
-    start_date=datetime(2024, 1, 1),
+    schedule_interval="0 7,18 * * *",
+    start_date=datetime(2024, 1, 1, 7, 0, 0),
     catchup=False,
     params=dict(
         limit=100,
