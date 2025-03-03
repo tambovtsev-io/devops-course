@@ -56,7 +56,7 @@
 </style>
 {% endblock %} {% block content %}
 <div class="container-fluid">
-    <h2 class="mb-4">Top 10 CivitAI Images</h2>
+    <h2 class="mb-4">Top Images of the Latest Run</h2>
 
     {% if not images %}
     <div class="alert alert-info">
@@ -78,9 +78,9 @@
                         class="d-flex justify-content-between align-items-center mb-3"
                     >
                         <h5 class="card-title mb-0">By {{ image.username }}</h5>
-                        <span class="badge badge-primary"
-                            >Total: {{ image.total_reactions }}</span
-                        >
+                        <span class="badge badge-primary">
+                            Total: {{ image.total_reactions }}
+                        </span>
                     </div>
 
                     <!-- Reactions -->

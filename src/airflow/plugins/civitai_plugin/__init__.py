@@ -1,7 +1,7 @@
 from airflow.plugins_manager import AirflowPlugin
 from flask import Blueprint
 
-from src.airflow.plugins.civitai_images_plugin.views import CivitaiImagesView
+from src.airflow.plugins.civitai_plugin.views import CivitaiImagesView
 
 # Create Flask blueprint for static files and templates
 civitai_blueprint = Blueprint(
@@ -16,7 +16,7 @@ civitai_blueprint = Blueprint(
 class CivitaiImagesPlugin(AirflowPlugin):
     """Plugin for displaying CivitAI image analytics"""
 
-    name = "CivitAI Analytics Plugin"
+    name = "CivitAI Images Plugin"
     flask_blueprints = [civitai_blueprint]
     appbuilder_views = [
         {"name": "Top Images", "category": "CivitAI", "view": CivitaiImagesView()}
