@@ -12,6 +12,11 @@ x-airflow-common: &airflow-common
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: "true"
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
 
+    # Remap code for airflow to ./src/airflow/
+    AIRFLOW__CORE__DAGS_FOLDER: /opt/airflow/src/airflow/dags
+    AIRFLOW__CORE__PLUGINS_FOLDER: /opt/airflow/src/airflow/plugins
+    AIRFLOW__CORE__CONFIG_FOLDER: /opt/airflow/src/airflow/config
+
     # CivitAI environment variables - point to civitai-db service
     POSTGRES_USER: ${POSTGRES_USER:-civitai_client}
     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-1234}
@@ -21,11 +26,9 @@ x-airflow-common: &airflow-common
     POSTGRES_SCHEMA: $POSTGRES_SCHEMA
     CIVITAI_API_KEY: ${CIVITAI_API_KEY}
   volumes:
-    - ${AIRFLOW_PROJ_DIR:-.}/src:/opt/airflow/src
-    - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
-    - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
-    - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
-    - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
+    - ./src:/opt/airflow/src
+    - ./logs:/opt/airflow/logs
+    - ./pyproject.toml:/opt/airflow/pyproject.toml
   user: "${AIRFLOW_UID:-50000}:0"
   depends_on: &airflow-common-depends-on
     airflow-db:

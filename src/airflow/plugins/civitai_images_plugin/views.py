@@ -1,5 +1,3 @@
-import sys
-from pathlib import Path
 from typing import List
 
 import pandas as pd
@@ -8,12 +6,6 @@ from airflow.utils.session import create_session
 from airflow.www.decorators import action_logging
 from flask_appbuilder import BaseView, expose
 from flask_appbuilder.security.decorators import has_access
-
-# Add project root
-project_root = str(Path(__file__).parents[2].absolute())
-if project_root not in sys.path:
-    sys.path.append(project_root)
-
 
 from src.civitai_client import ImageData
 

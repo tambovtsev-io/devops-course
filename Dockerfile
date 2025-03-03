@@ -6,13 +6,13 @@ USER root
 WORKDIR $AIRFLOW_HOME
 
 # Copy source code
-COPY ./src .
-COPY ./dags .
-COPY pyproject.toml .
+COPY ./src ./src
+COPY pyproject.toml ./
 
 # Install uv and resolve dependencies
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 RUN uv sync --no-dev
 ENV PATH="$AIRFLOW_HOME/.venv/bin:$PATH"
+ENV PYTHONPATH="$AIRFLOW_HOME:$PYTHONPATH"
 
 USER airflow

@@ -1,17 +1,9 @@
 import asyncio
-import sys
 from datetime import datetime, timedelta
-from pathlib import Path
 
-from airflow import DAG
 from airflow.operators.python import PythonOperator
 
-# Add project_dir to PYTHONPATH
-dag_dir = Path(__file__).parent
-project_dir = dag_dir.parent
-if project_dir not in sys.path:
-    sys.path.append(str(project_dir))
-
+from airflow import DAG
 from src.civitai_client import (
     CivitAIClient,
     Database,
