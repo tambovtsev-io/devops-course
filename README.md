@@ -36,7 +36,7 @@ POSTGRES_DB=civitai_analytics
 1. Запустите контейнеры: `docker compose up`
 2. Войдите в AirFlow: `localhost:8080`. Логин: `admin`, Пароль: `1234`
 3. Запустите DAG `civitai_etl`
-4. Перейдите в `CivitAI/Top Images` в интерфейсе AirFlow или перейдите на эндпоинт `/civitai`, чтобы посмотреть изображения.
+4. Перейдите в `CivitAI/Top Images` в интерфейсе AirFlow или на эндпоинт `/civitai`, чтобы посмотреть изображения.
 5. Проверить базу данных можно в ноутбуке: [ноутбук с тестами](./notebooks/analyse_images.ipynb)
 
 ## Схема БД для хранения изображений
