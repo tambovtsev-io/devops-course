@@ -1,6 +1,9 @@
 # Project folders
 logs
-# notebooks
+
+# Notebooks
+notebooks
+!notebooks/analyze_images.ipynb
 
 # Mac OS-specific storage files
 .DS_Store
