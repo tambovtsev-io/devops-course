@@ -74,6 +74,7 @@ class CivitaiImagesView(BaseView):
             record = {
                 "id": img.id,
                 "url": img.url,
+                "url_id": f"http://civitai.com/images/{img.id}",
                 "username": img.username,
                 "prompt": img.meta.prompt,
                 "model": img.base_model,
@@ -105,7 +106,9 @@ class CivitaiImagesView(BaseView):
         for _, row in df_top.iterrows():
             image_data.append(
                 {
+                    "id": row["id"],
                     "url": row["url"],
+                    "url_id": row["url_id"],
                     "username": row["username"],
                     "prompt": row["prompt"],
                     "model": row["model"],

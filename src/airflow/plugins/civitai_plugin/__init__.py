@@ -1,7 +1,7 @@
 from airflow.plugins_manager import AirflowPlugin
 from flask import Blueprint
 
-from src.airflow.plugins.civitai_plugin.views import CivitaiImagesView
+from src.airflow.plugins.civitai_plugin.views.images_view import CivitaiImagesView
 
 # Create Flask blueprint for static files and templates
 civitai_blueprint = Blueprint(
