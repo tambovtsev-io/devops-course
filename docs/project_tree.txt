@@ -1,0 +1,22 @@
+./civitai-scraper
+├── config
+├── dags
+│   └── civitai
+│       └── civitai_images_dag.py
+├── docs
+│   ├── api_schema
+│   │   └── images.md
+│   ├── design_document.md
+│   └── project_tree.txt
+├── logs
+├── plugins
+├── src
+│   └── civitai_client
+│       ├── civitai_client.py
+│       ├── civitai_db.py
+│       └── __init__.py
+├── docker-compose.yaml
+├── Dockerfile
+├── poetry.lock
+├── pyproject.toml
+└── README.md

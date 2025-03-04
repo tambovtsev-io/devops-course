@@ -1,0 +1,176 @@
+{% extends "appbuilder/base.html" %} {% block head_css %} {{ super() }}
+<style>
+    /* Grid layout fixes */
+    .images-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+        gap: 2rem;
+        padding: 1rem;
+    }
+
+    .image-card {
+        /* Remove margin-bottom as gap handles spacing */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        border: 1px solid #eee;
+        height: 100%; /* Ensure all cards are same height */
+        display: flex;
+        flex-direction: column;
+    }
+
+    .image-container {
+        position: relative;
+        width: 100%;
+        padding-top: 100%; /* Maintains square aspect ratio */
+    }
+
+    .image-container img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .card-body {
+        flex: 1; /* Allow card body to fill remaining space */
+        display: flex;
+        flex-direction: column;
+    }
+
+    .reactions-container {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+    }
+
+    .reaction-item {
+        display: inline-flex;
+        align-items: center;
+        margin-right: 1rem;
+    }
+
+    .prompt-container {
+        max-height: 100px;
+        overflow-y: auto;
+        margin-bottom: 1rem;
+        padding: 10px;
+        background: #f8f9fa;
+        border-radius: 4px;
+    }
+
+    .parameters-table {
+        font-size: 0.9rem;
+        margin-top: auto; /* Push to bottom of card */
+    }
+
+    .parameters-table td {
+        padding: 4px 8px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .images-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %} {% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4">Top Images of the Latest Run</h2>
+
+    {% if not images %}
+    <div class="alert alert-info">
+        No data available. Please ensure the DAG has completed a successful run.
+    </div>
+    {% else %}
+    <div class="images-grid">
+        {% for image in images %}
+        <div class="image-card">
+            <div class="image-container">
+                <img
+                    src="{{ image.url }}"
+                    alt="Generated image by {{ image.username }}"
+                    loading="lazy"
+                />
+            </div>
+            <div class="card-body">
+                <div
+                    class="d-flex justify-content-between align-items-center mb-3"
+                >
+                    <div class="d-flex align-items-center">
+                        <h5 class="card-title mb-0">
+                            <a
+                                href="{{ image.url_id }}"
+                                target="_blank"
+                                class="image-id"
+                                >#{{ image.id }}</a
+                            >
+                            by {{ image.username }}
+                        </h5>
+                    </div>
+                    <span class="badge badge-primary">
+                        Total: {{ image.total_reactions }}
+                    </span>
+                </div>
+
+                <div class="reactions-container">
+                    <div class="d-flex justify-content-between flex-wrap">
+                        <span class="reaction-item"
+                            >❤️ {{ image.stats.heart_count }}</span
+                        >
+                        <span class="reaction-item"
+                            >👍 {{ image.stats.like_count }}</span
+                        >
+                        <span class="reaction-item"
+                            >😂 {{ image.stats.laugh_count }}</span
+                        >
+                        <span class="reaction-item"
+                            >😢 {{ image.stats.cry_count }}</span
+                        >
+                        <span class="reaction-item"
+                            >💬 {{ image.stats.comment_count }}</span
+                        >
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <h6>Prompt</h6>
+                    <div class="prompt-container">
+                        <p class="card-text">{{ image.prompt }}</p>
+                    </div>
+                </div>
+
+                <div>
+                    <h6>Generation Parameters</h6>
+                    <div class="table-responsive">
+                        <table
+                            class="table table-sm table-hover parameters-table"
+                        >
+                            <tbody>
+                                <tr>
+                                    <td class="text-muted">
+                                        <strong>Model</strong>
+                                    </td>
+                                    <td>{{ image.model }}</td>
+                                </tr>
+                                {% for key, value in image.parameters.items() %}
+                                <tr>
+                                    <td class="text-muted">
+                                        <strong>{{ key }}</strong>
+                                    </td>
+                                    <td>{{ value }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
